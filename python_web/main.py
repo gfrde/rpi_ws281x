@@ -18,7 +18,7 @@ LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
 LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
 LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL    = 0
-#LED_STRIP      = ws.SK6812_STRIP_RGBW
+LED_STRIP      = ws.SK6812_STRIP_RGBW
 
 strip = None
 
@@ -64,8 +64,7 @@ def colorSet(currentColorSetting):
 	current = currentColorSetting[0]['color']
 	current = factorizeByteWise(current, currentColorSetting[0]['factor'])
 
-	# for i in range(strip.numPixels()):
-	for i in range(LED_COUNT):
+	for i in range(strip.numPixels()):
 		if i in stripColor:
 			current = currentColorSetting[i]['color']
 			current = factorizeByteWise(current, currentColorSetting[i]['factor'])
@@ -81,6 +80,7 @@ def colorSet(currentColorSetting):
 def colorWipe(color, wait_ms=0):
 	print('wiping color')
 	if strip is None:
+		print('STRIP is None')
 		return
 
 	"""Wipe color across display a pixel at a time."""
@@ -97,16 +97,31 @@ def ledOff():
 
 def ledBright():
 	for c in strips:
-		stripColor[c]['factor'] += 0.2
+		stripColor[c]['factor'] += 0.1
 		if stripColor[c]['factor'] > 1:
 			stripColor[c]['factor'] = 1.0
 	colorSet(stripColor)
 
 def ledDarker():
 	for c in strips:
-		stripColor[c]['factor'] -= 0.2
+		stripColor[c]['factor'] -= 0.1
 		if stripColor[c]['factor'] < 0:
 			stripColor[c]['factor'] = 0.0
+	colorSet(stripColor)
+
+def ledWarm():
+	for c in strips:
+		stripColor[c]['color'] = Color(255,255,255,0)
+	colorSet(stripColor)
+
+def ledCold():
+	for c in strips:
+		stripColor[c]['color'] = Color(0,0,0,255)
+	colorSet(stripColor)
+
+def ledAll():
+	for c in strips:
+		stripColor[c]['color'] = Color(255,255,255,255)
 	colorSet(stripColor)
 
 
@@ -134,6 +149,15 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 		elif self.path=='/down':
 			ledDarker()
 			res = 'OK'
+		elif self.path=='/warm':
+			ledWarm()
+			res = 'OK'
+		elif self.path=='/cold':
+			ledCold()
+			res = 'OK'
+		elif self.path=='/all':
+			ledAll()
+			res = 'OK'
 
 		s = """<html><body>
 		<div>Result: RESULT</div>
@@ -142,6 +166,9 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 		<a href="/on">On</a><br/>
 		<a href="/up">Brighter</a><br/>
 		<a href="/down">Darker</a><br/>
+		<a href="/warm">Warm</a><br/>
+		<a href="/cold">Cold</a><br/>
+		<a href="/all">All</a><br/>
 		</body></html>
 		"""
 
@@ -172,6 +199,8 @@ def run():
 # Main program logic follows:
 if __name__ == '__main__':
 	initAll()
+
+	ledOff()
 	run()
 	# colorSet(None, stripColor)
 
