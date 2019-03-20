@@ -67,16 +67,16 @@ def addByteWise(v, r, g, b, w):
     red = int(((v >> 16) & 0xff) + r)
     white = int(((v >> 24) & 0xff) + w)
 
-    blue = min(1, blue)
+    blue = min(255, blue)
     blue = max(0, blue)
 
-    green = min(1, green)
+    green = min(255, green)
     green = max(0, green)
 
-    red = min(1, red)
+    red = min(255, red)
     red = max(0, red)
 
-    white = min(1, white)
+    white = min(255, white)
     white = max(0, white)
 
     return Color(red, green, blue, white)
