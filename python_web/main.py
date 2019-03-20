@@ -17,6 +17,7 @@ from neopixel import *
 
 PORT = 8080
 telegramToken = None
+telegramRask = None
 searchTelegramToken = [
     './telegram.token',
     '/etc/telegram.token'
@@ -189,13 +190,6 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         <br/>
         COMMANDS
         <br/>
-        <a href="/off">Off</a><br/>
-        <a href="/on">On</a><br/>
-        <a href="/up">Brighter</a><br/>
-        <a href="/down">Darker</a><br/>
-        <a href="/warm">Warm</a><br/>
-        <a href="/cold">Cold</a><br/>
-        <a href="/all">All</a><br/>
         </body></html>
         """
 
@@ -212,6 +206,10 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 commands = {
     'on': {'name': 'An', 'fct': ledOn},
     'off': {'name': 'Aus', 'fct': ledOff},
+    'up': {'name': 'Aus', 'fct': ledBright},
+    'down': {'name': 'Aus', 'fct': ledDarker},
+    'warm': {'name': 'Aus', 'fct': ledWarm},
+    'cold': {'name': 'Aus', 'fct': ledCold},
     'all': {'name': 'Alle', 'fct': ledAll}
 }
 
@@ -233,11 +231,12 @@ def hello(bot, update):
         res = 'ok'
         commands[cmd]['fct']()
     update.message.reply_text(
-        'Hello {} - command {}'.format(update.message.from_user.first_name, cmd, res))
+        'Hello {} - command {} -> {}'.format(update.message.from_user.first_name, cmd, res))
 
 
 def initTelegram():
     global telegramToken
+    global telegramRask
 
     src = None
     logging.info('searching for telegram token: {}', searchTelegramToken)
@@ -264,6 +263,7 @@ def initTelegram():
         updater.dispatcher.add_handler(CommandHandler(['on', 'off', 'all'], hello))
 
         updater.start_polling(poll_interval=5)
+        telegramRask = updater
     else:
         logging.info('no telegram token found --> no handling of messages')
 
@@ -288,5 +288,9 @@ if __name__ == '__main__':
     ledOff()
     run()
     # colorSet(None, stripColor)
+
+    if not telegramRask is None:
+        logging.info('stopping telegram task')
+        telegramRask.stop()
 
     pass
