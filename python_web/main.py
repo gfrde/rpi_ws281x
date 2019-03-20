@@ -61,6 +61,27 @@ def factorizeByteWise(v, factor):
     return Color(red, green, blue, white)
 
 
+def addByteWise(v, r, g, b, w):
+    blue = int((v & 0xff) + b)
+    green = int(((v >> 8) & 0xff) + g)
+    red = int(((v >> 16) & 0xff) + r)
+    white = int(((v >> 24) & 0xff) + w)
+
+    blue = min(1, blue)
+    blue = max(0, blue)
+
+    green = min(1, green)
+    green = max(0, green)
+
+    red = min(1, red)
+    red = max(0, red)
+
+    white = min(1, white)
+    white = max(0, white)
+
+    return Color(red, green, blue, white)
+
+
 std = Color(255, 255, 255, 255)
 stripColor = {}
 
@@ -115,6 +136,26 @@ def ledOn():
 
 def ledOff():
     colorWipe(Color(0, 0, 0, 0))
+
+
+def ledRedMore():
+    for c in strips:
+        stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 25, 0, 0, 0)
+
+
+def ledRedLess():
+    for c in strips:
+        stripColor[c]['color'] = addByteWise(stripColor[c]['color'], -25, 0, 0, 0)
+
+
+def ledGreenMore():
+    for c in strips:
+        stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, 25, 0, 0)
+
+
+def ledGreenLess():
+    for c in strips:
+        stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, -25, 0, 0)
 
 
 def ledBright():
@@ -210,7 +251,10 @@ commands = {
     'down': {'name': 'Aus', 'fct': ledDarker},
     'warm': {'name': 'Aus', 'fct': ledWarm},
     'cold': {'name': 'Aus', 'fct': ledCold},
-    'all': {'name': 'Alle', 'fct': ledAll}
+    'all': {'name': 'Alle', 'fct': ledAll},
+
+    'red+': {'name': 'Red Up', 'fct': ledRedMore},
+    'red-': {'name': 'Red Down', 'fct': ledRedLess},
 }
 
 
@@ -224,7 +268,7 @@ def initAll():
 
 
 def hello(bot, update):
-    logging.info('telegram command: {}', update.message.text)
+    logging.info('telegram command: %s' % (update.message.text,) )
     cmd = update.message.text[1:]
     res = 'ignored'
     if cmd in commands:
@@ -245,7 +289,7 @@ def initTelegram():
             src = f
             break
 
-    if not src is None:
+    if src is not None:
         with open(src, 'r') as fd:
             for line in fd:
                 line = line.strip()
@@ -257,10 +301,14 @@ def initTelegram():
                 telegramToken = line
                 logging.info('found token for telegram')
 
-    if not telegramToken is None:
+    cmds = []
+    for c in commands:
+        cmds.append(c)
+
+    if telegramToken is not None:
         from telegram.ext import Updater, CommandHandler
         updater = Updater(token=telegramToken)
-        updater.dispatcher.add_handler(CommandHandler(['on', 'off', 'all'], hello))
+        updater.dispatcher.add_handler(CommandHandler(cmds, hello))
 
         updater.start_polling(poll_interval=5)
         telegramTask = updater
