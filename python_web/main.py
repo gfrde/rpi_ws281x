@@ -100,8 +100,12 @@ def colorWipe(color, wait_ms=0):
     """Wipe color across display a pixel at a time."""
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
-        strip.show()
-        time.sleep(wait_ms / 1000.0)
+
+        if i % 2 == 0:
+            strip.show()
+            time.sleep(wait_ms / 1000.0)
+
+    strip.show()
 
 
 def ledOn():
@@ -181,22 +185,31 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
             res = 'OK'
 
         s = """<html><body>
-		<div>Result: RESULT</div>
-		<br/>
-		<a href="/off">Off</a><br/>
-		<a href="/on">On</a><br/>
-		<a href="/up">Brighter</a><br/>
-		<a href="/down">Darker</a><br/>
-		<a href="/warm">Warm</a><br/>
-		<a href="/cold">Cold</a><br/>
-		<a href="/all">All</a><br/>
-		</body></html>
-		"""
+        <div>Result: RESULT</div>
+        <br/>
+        <a href="/off">Off</a><br/>
+        <a href="/on">On</a><br/>
+        <a href="/up">Brighter</a><br/>
+        <a href="/down">Darker</a><br/>
+        <a href="/warm">Warm</a><br/>
+        <a href="/cold">Cold</a><br/>
+        <a href="/all">All</a><br/>
+        </body></html>
+        """
 
         self._set_headers()
         # self.wfile.write(b'<html><body></body></html>')
         self.wfile.write(bytearray(s.replace('RESULT', res)))
         pass
+
+
+
+commands = {
+    'on': {'name': 'An', 'fct': ledOn},
+    'off': {'name': 'Aus', 'fct': ledOff},
+    'all': {'name': 'Alle', 'fct': ledAll}
+}
+
 
 
 def initAll():
@@ -209,9 +222,14 @@ def initAll():
 
 
 def hello(bot, update):
-    logging.info(update.message.text)
+    logging.info('telegram command: {}', update.message.text)
+    cmd = update.message.text[1:]
+    res = 'ignored'
+    if cmd in commands:
+        res = 'ok'
+        commands[cmd]['fct']()
     update.message.reply_text(
-        'Hello {} - You send {}'.format(update.message.from_user.first_name, update.message.text))
+        'Hello {} - command {}'.format(update.message.from_user.first_name, cmd, res))
 
 
 def initTelegram():
@@ -225,7 +243,7 @@ def initTelegram():
             break
 
     if not src is None:
-        with os.open(src, os.O_RDONLY) as fd:
+        with open(src, 'r') as fd:
             for line in fd:
                 line = line.strip()
                 if len(line) < 20:
