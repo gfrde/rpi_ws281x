@@ -70,7 +70,7 @@ for c in strips:
 
 
 def colorSet(currentColorSetting):
-	print('setting color')
+	logging.info('setting color')
 	"""Wipe color across display a pixel at a time."""
 	current = currentColorSetting[0]['color']
 	current = factorizeByteWise(current, currentColorSetting[0]['factor'])
@@ -91,7 +91,7 @@ def colorSet(currentColorSetting):
 def colorWipe(color, wait_ms=0):
 	print('wiping color')
 	if strip is None:
-		print('STRIP is None')
+		logging.warn('STRIP is None')
 		return
 
 	"""Wipe color across display a pixel at a time."""
@@ -237,7 +237,7 @@ def initTelegram():
 
 def run():
 	# Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-    Handler = LedHttpServer
+	Handler = LedHttpServer
 
 	httpd = SocketServer.TCPServer(("", PORT), Handler)
 	print "serving at port", PORT
