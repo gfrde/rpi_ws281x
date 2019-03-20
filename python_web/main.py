@@ -17,7 +17,7 @@ from neopixel import *
 
 PORT = 8080
 telegramToken = None
-telegramRask = None
+telegramTask = None
 searchTelegramToken = [
     './telegram.token',
     '/etc/telegram.token'
@@ -236,7 +236,7 @@ def hello(bot, update):
 
 def initTelegram():
     global telegramToken
-    global telegramRask
+    global telegramTask
 
     src = None
     logging.info('searching for telegram token: {}', searchTelegramToken)
@@ -263,7 +263,7 @@ def initTelegram():
         updater.dispatcher.add_handler(CommandHandler(['on', 'off', 'all'], hello))
 
         updater.start_polling(poll_interval=5)
-        telegramRask = updater
+        telegramTask = updater
     else:
         logging.info('no telegram token found --> no handling of messages')
 
@@ -275,6 +275,7 @@ def run():
     httpd = SocketServer.TCPServer(("", PORT), Handler)
     print "serving at port", PORT
     httpd.serve_forever()
+    logging.info('HTTP task killed')
 
 
 # Main program logic follows:
@@ -289,8 +290,8 @@ if __name__ == '__main__':
     run()
     # colorSet(None, stripColor)
 
-    if not telegramRask is None:
+    if telegramTask is not None:
         logging.info('stopping telegram task')
-        telegramRask.stop()
+        telegramTask.stop()
 
     pass
