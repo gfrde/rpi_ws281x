@@ -141,21 +141,25 @@ def ledOff():
 def ledRedMore():
     for c in strips:
         stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 25, 0, 0, 0)
+    colorSet(stripColor)
 
 
 def ledRedLess():
     for c in strips:
         stripColor[c]['color'] = addByteWise(stripColor[c]['color'], -25, 0, 0, 0)
+    colorSet(stripColor)
 
 
 def ledGreenMore():
     for c in strips:
         stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, 25, 0, 0)
+    colorSet(stripColor)
 
 
 def ledGreenLess():
     for c in strips:
         stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, -25, 0, 0)
+    colorSet(stripColor)
 
 
 def ledBright():
@@ -203,28 +207,32 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         print "GET request %s" % (self.path)
 
-        res = 'unkown'
-        if self.path == '/on':
-            ledOn()
-            res = 'OK'
-        elif self.path == '/off':
-            ledOff()
-            res = 'OK'
-        elif self.path == '/up':
-            ledBright()
-            res = 'OK'
-        elif self.path == '/down':
-            ledDarker()
-            res = 'OK'
-        elif self.path == '/warm':
-            ledWarm()
-            res = 'OK'
-        elif self.path == '/cold':
-            ledCold()
-            res = 'OK'
-        elif self.path == '/all':
-            ledAll()
-            res = 'OK'
+        cmd = self.path[1:]
+        res = 'ignored'
+        if cmd in commands:
+            res = 'ok'
+            commands[cmd]['fct']()
+        # if self.path == '/on':
+        #     ledOn()
+        #     res = 'OK'
+        # elif self.path == '/off':
+        #     ledOff()
+        #     res = 'OK'
+        # elif self.path == '/up':
+        #     ledBright()
+        #     res = 'OK'
+        # elif self.path == '/down':
+        #     ledDarker()
+        #     res = 'OK'
+        # elif self.path == '/warm':
+        #     ledWarm()
+        #     res = 'OK'
+        # elif self.path == '/cold':
+        #     ledCold()
+        #     res = 'OK'
+        # elif self.path == '/all':
+        #     ledAll()
+        #     res = 'OK'
 
         s = """<html><body>
         <div>Result: RESULT</div>
@@ -247,10 +255,10 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 commands = {
     'on': {'name': 'An', 'fct': ledOn},
     'off': {'name': 'Aus', 'fct': ledOff},
-    'up': {'name': 'Aus', 'fct': ledBright},
-    'down': {'name': 'Aus', 'fct': ledDarker},
-    'warm': {'name': 'Aus', 'fct': ledWarm},
-    'cold': {'name': 'Aus', 'fct': ledCold},
+    'up': {'name': 'Heller', 'fct': ledBright},
+    'down': {'name': 'Dunkler', 'fct': ledDarker},
+    'warm': {'name': 'Warm', 'fct': ledWarm},
+    'cold': {'name': 'Kalt', 'fct': ledCold},
     'all': {'name': 'Alle', 'fct': ledAll},
 
     'red+': {'name': 'Red Up', 'fct': ledRedMore},
@@ -283,7 +291,7 @@ def initTelegram():
     global telegramTask
 
     src = None
-    logging.info('searching for telegram token: {}', searchTelegramToken)
+    logging.info('searching for telegram token: %s' % (searchTelegramToken,) )
     for f in searchTelegramToken:
         if os.path.exists(f):
             src = f
