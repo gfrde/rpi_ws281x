@@ -187,6 +187,8 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         s = """<html><body>
         <div>Result: RESULT</div>
         <br/>
+        COMMANDS
+        <br/>
         <a href="/off">Off</a><br/>
         <a href="/on">On</a><br/>
         <a href="/up">Brighter</a><br/>
@@ -197,11 +199,14 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         </body></html>
         """
 
+        cmdList = ''
+        for c in commands:
+            cmdList += '<a href="/%s">%s</a><br/>' % (c, commands[c]['name'],)
+
         self._set_headers()
         # self.wfile.write(b'<html><body></body></html>')
-        self.wfile.write(bytearray(s.replace('RESULT', res)))
+        self.wfile.write(bytearray(s.replace('RESULT', res).replace('COMMANDS', cmdList)))
         pass
-
 
 
 commands = {
@@ -209,7 +214,6 @@ commands = {
     'off': {'name': 'Aus', 'fct': ledOff},
     'all': {'name': 'Alle', 'fct': ledAll}
 }
-
 
 
 def initAll():
