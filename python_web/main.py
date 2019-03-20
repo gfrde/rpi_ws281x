@@ -1,14 +1,25 @@
+"""
+
+pip install python-telegram-bot
+"""
 
 import sys
 sys.path.append('../python')
 
+import os
 import time
 import SocketServer
 import SimpleHTTPServer
+import logging
 
 from neopixel import *
 
 PORT = 8080
+telegramToken = None
+searchTelegramToken = [
+	'./telegram.token',
+	'/etc/telegram.token'
+]
 
 # LED strip configuration:
 LED_COUNT      = 444      # Number of LED pixels.
@@ -186,19 +197,62 @@ def initAll():
 	strip.begin()
 
 
-def run():
+def hello(bot, update):
+	logging.info(update.message.text)
+	update.message.reply_text(
+		'Hello {} - You send {}'.format(update.message.from_user.first_name, update.message.text))
 
-    # Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+
+def initTelegram():
+	global telegramToken
+
+	src = None
+	logging.info('searching for telegram token: {}', searchTelegramToken)
+	for f in searchTelegramToken:
+		if os.path.exists(f):
+			src = f
+			break
+
+	if not src is None:
+		with os.open(src, os.O_RDONLY) as fd:
+			for line in fd:
+				line = line.strip()
+				if len(line) < 20:
+					continue
+				if line[0] == '#':
+					continue
+
+				telegramToken = line
+				logging.info('found token for telegram')
+
+	if not telegramToken is None:
+		from telegram.ext import Updater, CommandHandler
+		updater = Updater(token=telegramToken)
+		updater.dispatcher.add_handler(CommandHandler(['on', 'off', 'all'], hello))
+
+		updater.start_polling(poll_interval=5)
+	else:
+		logging.info('no telegram token found --> no handling of messages')
+
+
+def run():
+	# Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
     Handler = LedHttpServer
 
-    httpd = SocketServer.TCPServer(("", PORT), Handler)
-    print "serving at port", PORT
-    httpd.serve_forever()
+	httpd = SocketServer.TCPServer(("", PORT), Handler)
+	print "serving at port", PORT
+	httpd.serve_forever()
 
 
 # Main program logic follows:
 if __name__ == '__main__':
+
+	# logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+	logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+
+
 	initAll()
+	initTelegram()
 
 	ledOff()
 	run()
