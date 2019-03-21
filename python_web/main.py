@@ -40,6 +40,12 @@ LED_STRIP = ws.SK6812_STRIP_RGBW
 
 strip = None
 
+# works for my stripe!
+BITPOS_RED   = 8
+BITPOS_GREEN = 16
+BITPOS_WHITE = 24
+
+
 strips = {
     0: {'name': 'tv', 'factor': 1.0},
     10: {'name': 'space', 'factor': 0.5},
@@ -50,27 +56,27 @@ strips = {
 }
 
 
-#def Color(red, green, blue, white=0):
-#    """Convert the provided red, green, blue color to a 24-bit color value.
-#    Each color component should be a value 0-255 where 0 is the lowest intensity
-#    and 255 is the highest intensity.
-#    """
-#    return (white << 24) | (red << 16) | (green << 8) | blue
+def Color(red, green, blue, white=0):
+    """Convert the provided red, green, blue color to a 24-bit color value.
+    Each color component should be a value 0-255 where 0 is the lowest intensity
+    and 255 is the highest intensity.
+    """
+    return (white << BITPOS_WHITE) | (red << BITPOS_RED) | (green << BITPOS_GREEN) | blue
 
 
 def factorizeByteWise(v, factor):
     blue = int((v & 0xff) * factor)
-    green = int(((v >> 8) & 0xff) * factor)
-    red = int(((v >> 16) & 0xff) * factor)
-    white = int(((v >> 24) & 0xff) * factor)
+    green = int(((v >> BITPOS_GREEN) & 0xff) * factor)
+    red = int(((v >> BITPOS_RED) & 0xff) * factor)
+    white = int(((v >> BITPOS_WHITE) & 0xff) * factor)
     return Color(red, green, blue, white)
 
 
 def addByteWise(v, r, g, b, w):
     blue = int((v & 0xff) + b)
-    green = int(((v >> 8) & 0xff) + g)
-    red = int(((v >> 16) & 0xff) + r)
-    white = int(((v >> 24) & 0xff) + w)
+    green = int(((v >> BITPOS_GREEN) & 0xff) + g)
+    red = int(((v >> BITPOS_RED) & 0xff) + r)
+    white = int(((v >> BITPOS_WHITE) & 0xff) + w)
 
     blue = min(255, blue)
     blue = max(0, blue)
