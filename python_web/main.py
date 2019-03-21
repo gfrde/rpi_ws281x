@@ -50,12 +50,12 @@ strips = {
 }
 
 
-def Color(red, green, blue, white=0):
-    """Convert the provided red, green, blue color to a 24-bit color value.
-    Each color component should be a value 0-255 where 0 is the lowest intensity
-    and 255 is the highest intensity.
-    """
-    return (white << 24) | (red << 16) | (green << 8) | blue
+#def Color(red, green, blue, white=0):
+#    """Convert the provided red, green, blue color to a 24-bit color value.
+#    Each color component should be a value 0-255 where 0 is the lowest intensity
+#    and 255 is the highest intensity.
+#    """
+#    return (white << 24) | (red << 16) | (green << 8) | blue
 
 
 def factorizeByteWise(v, factor):
@@ -415,7 +415,7 @@ if __name__ == '__main__':
 
     ledOff()
     run()
-    # colorSet(None, stripColor)
+    #colorSet(None, stripColor)
 
     if telegramTask is not None:
         logging.info('stopping telegram task')
