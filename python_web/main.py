@@ -139,13 +139,15 @@ def ledOff():
 
 
 def ledRedMore():
-    for c in strips:
+    logging.info('ledRedMore')
+    for c in stripColor:
         stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 25, 0, 0, 0)
     colorSet(stripColor)
 
 
 def ledRedLess():
-    for c in strips:
+    logging.info('ledRedLess')
+    for c in stripColor:
         stripColor[c]['color'] = addByteWise(stripColor[c]['color'], -25, 0, 0, 0)
     colorSet(stripColor)
 
@@ -210,7 +212,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         cmd = self.path[1:]
         res = 'ignored'
         if cmd in commands:
-            res = 'ok'
+            res = commands[cmd]['fct'] + ' - ok'
             commands[cmd]['fct']()
         # if self.path == '/on':
         #     ledOn()
@@ -242,9 +244,15 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         </body></html>
         """
 
-        cmdList = ''
+        ordered = []
         for c in commands:
-            cmdList += '<a href="/%s">%s</a><br/>' % (c, commands[c]['name'],)
+            ordered.append(commands[c])
+
+        ordered.sort(key=lambda x: x['order'])
+
+        cmdList = ''
+        for v in ordered:
+            cmdList += '<a href="/%s">%s</a><br/>' % (v['key'], v['name'],)
 
         self._set_headers()
         # self.wfile.write(b'<html><body></body></html>')
@@ -253,17 +261,24 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 
 commands = {
-    'on': {'name': 'An', 'fct': ledOn},
-    'off': {'name': 'Aus', 'fct': ledOff},
-    'up': {'name': 'Heller', 'fct': ledBright},
-    'down': {'name': 'Dunkler', 'fct': ledDarker},
-    'warm': {'name': 'Warm', 'fct': ledWarm},
-    'cold': {'name': 'Kalt', 'fct': ledCold},
-    'all': {'name': 'Alle', 'fct': ledAll},
+    'on':  {'name': 'An', 'order': 1, 'fct': ledOn},
+    'off': {'name': 'Aus', 'order': 2, 'fct': ledOff},
 
-    'red+': {'name': 'Red Up', 'fct': ledRedMore},
-    'red-': {'name': 'Red Down', 'fct': ledRedLess},
+    'up':  {'name': 'Heller', 'order': 5, 'fct': ledBright},
+    'down': {'name': 'Dunkler', 'order': 6, 'fct': ledDarker},
+
+    'warm': {'name': 'Warm', 'order': 10, 'fct': ledWarm},
+    'cold': {'name': 'Kalt', 'order': 11, 'fct': ledCold},
+    'all':  {'name': 'Alle', 'order': 12, 'fct': ledAll},
+
+    'red+': {'name': 'Red Up', 'order': 20, 'fct': ledRedMore},
+    'redp': {'name': 'Red Up', 'order': 20, 'fct': ledRedMore},
+    'red-': {'name': 'Red Down', 'order': 21, 'fct': ledRedLess},
+    'redm': {'name': 'Red Down', 'order': 21, 'fct': ledRedLess},
 }
+
+for c in commands:
+    commands[c]['key'] = c
 
 
 def initAll():
