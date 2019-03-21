@@ -164,6 +164,30 @@ def ledGreenLess():
     colorSet(stripColor)
 
 
+def ledBlueMore():
+    for c in strips:
+        stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, 0, 25, 0)
+    colorSet(stripColor)
+
+
+def ledBlueLess():
+    for c in strips:
+        stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, 0, -25, 0)
+    colorSet(stripColor)
+
+
+def ledWhiteMore():
+    for c in strips:
+        stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, 0, 0, 25)
+    colorSet(stripColor)
+
+
+def ledWhiteLess():
+    for c in strips:
+        stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, 0, 0, -25)
+    colorSet(stripColor)
+
+
 def ledBright():
     for c in strips:
         stripColor[c]['factor'] += 0.1
@@ -180,13 +204,13 @@ def ledDarker():
     colorSet(stripColor)
 
 
-def ledWarm():
+def ledCold():
     for c in strips:
         stripColor[c]['color'] = Color(255, 255, 255, 0)
     colorSet(stripColor)
 
 
-def ledCold():
+def ledWarm():
     for c in strips:
         stripColor[c]['color'] = Color(0, 0, 0, 255)
     colorSet(stripColor)
@@ -252,6 +276,8 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         cmdList = ''
         for v in ordered:
+            if v['key'].startswith('empty'):
+                cmdList += '<br/>'
             cmdList += '<a href="/%s">%s</a><br/>' % (v['key'], v['name'],)
 
         self._set_headers()
@@ -264,17 +290,40 @@ commands = {
     'on':  {'name': 'An', 'order': 1, 'fct': ledOn},
     'off': {'name': 'Aus', 'order': 2, 'fct': ledOff},
 
+    'empty_1': {'name': '', 'order': 4},
+
     'up':  {'name': 'Heller', 'order': 5, 'fct': ledBright},
     'down': {'name': 'Dunkler', 'order': 6, 'fct': ledDarker},
+
+    'empty_9': {'name': '', 'order': 9},
 
     'warm': {'name': 'Warm', 'order': 10, 'fct': ledWarm},
     'cold': {'name': 'Kalt', 'order': 11, 'fct': ledCold},
     'all':  {'name': 'Alle', 'order': 12, 'fct': ledAll},
 
+    'empty_19': {'name': '', 'order': 19},
+
     'red+': {'name': 'Red Up', 'order': 20, 'fct': ledRedMore},
     'redp': {'name': 'Red Up', 'order': 20, 'fct': ledRedMore},
     'red-': {'name': 'Red Down', 'order': 21, 'fct': ledRedLess},
     'redm': {'name': 'Red Down', 'order': 21, 'fct': ledRedLess},
+
+    'green+': {'name': 'Green Up', 'order': 30, 'fct': ledGreenMore},
+    'greenp': {'name': 'Green Up', 'order': 30, 'fct': ledGreenMore},
+    'green-': {'name': 'Green Down', 'order': 31, 'fct': ledGreenLess},
+    'greenm': {'name': 'Green Down', 'order': 31, 'fct': ledGreenLess},
+
+    'blue+': {'name': 'Blue Up', 'order': 40, 'fct': ledBlueMore},
+    'bluep': {'name': 'Blue Up', 'order': 40, 'fct': ledBlueMore},
+    'blue-': {'name': 'Blue Down', 'order': 41, 'fct': ledBlueLess},
+    'bluem': {'name': 'Blue Down', 'order': 41, 'fct': ledBlueLess},
+
+    'empty_49': {'name': '', 'order': 49},
+
+    'white+': {'name': 'White Up', 'order': 50, 'fct': ledWhiteMore},
+    'whitep': {'name': 'White Up', 'order': 50, 'fct': ledWhiteMore},
+    'white-': {'name': 'White Down', 'order': 51, 'fct': ledWhiteLess},
+    'whitem': {'name': 'White Down', 'order': 51, 'fct': ledWhiteLess},
 }
 
 for c in commands:
@@ -326,6 +375,8 @@ def initTelegram():
 
     cmds = []
     for c in commands:
+        if 'fct' not in commands[c]:
+            continue
         cmds.append(c)
 
     if telegramToken is not None:
