@@ -212,7 +212,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         cmd = self.path[1:]
         res = 'ignored'
         if cmd in commands:
-            res = commands[cmd]['fct'] + ' - ok'
+            res = cmd + ' - ok'
             commands[cmd]['fct']()
         # if self.path == '/on':
         #     ledOn()
