@@ -1,6 +1,11 @@
 """
 
-pip install python-telegram-bot
+tries to use the telegram bot, if a token file "telegram.token' is found in local dir or in /etc
+
+
+for using telegram, install the bot via pip:
+    pip install python-telegram-bot
+
 """
 
 import sys
