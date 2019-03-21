@@ -143,6 +143,13 @@ def ledOff():
     colorWipe(Color(0, 0, 0, 0))
 
 
+def ledRed():
+    logging.info('ledRed')
+    for c in stripColor:
+        stripColor[c]['color'] = Color(255,0,0,0)
+    colorSet(stripColor)
+
+
 def ledRedMore():
     logging.info('ledRedMore')
     for c in stripColor:
@@ -157,6 +164,13 @@ def ledRedLess():
     colorSet(stripColor)
 
 
+def ledGreen():
+    logging.info('ledGreen')
+    for c in stripColor:
+        stripColor[c]['color'] = Color(0,255,0,0)
+    colorSet(stripColor)
+
+
 def ledGreenMore():
     for c in strips:
         stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, 25, 0, 0)
@@ -166,6 +180,13 @@ def ledGreenMore():
 def ledGreenLess():
     for c in strips:
         stripColor[c]['color'] = addByteWise(stripColor[c]['color'], 0, -25, 0, 0)
+    colorSet(stripColor)
+
+
+def ledBlue():
+    logging.info('ledBlue')
+    for c in stripColor:
+        stripColor[c]['color'] = Color(0,0,255,0)
     colorSet(stripColor)
 
 
@@ -329,6 +350,13 @@ commands = {
     'whitep': {'name': 'White Up', 'order': 50, 'fct': ledWhiteMore},
     'white-': {'name': 'White Down', 'order': 51, 'fct': ledWhiteLess},
     'whitem': {'name': 'White Down', 'order': 51, 'fct': ledWhiteLess},
+
+    'empty_59': {'name': '', 'order': 59},
+
+    'red': {'name': 'Red', 'order': 60, 'fct': ledRed},
+    'green': {'name': 'Green', 'order': 61, 'fct': ledGreen},
+    'blue': {'name': 'Blue', 'order': 62, 'fct': ledBlue},
+
 }
 
 for c in commands:
