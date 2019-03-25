@@ -10,6 +10,7 @@ for using telegram, install the bot via pip:
 
 import sys
 import os
+from io import BytesIO
 import signal
 import time
 import SocketServer
