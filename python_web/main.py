@@ -11,6 +11,7 @@ for using telegram, install the bot via pip:
 import sys
 import os
 from io import BytesIO
+import json
 import signal
 import time
 import SocketServer
@@ -369,15 +370,15 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         logging.info( "POST request %s - %s" % (self.path,self.command,) )
-        # content = self.rfile.read()
-        # logging.info(content)
-        #
-        # self._set_headers()
-        # self.wfile.write(b'<html><body>BLA</body></html>')
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
+
+        data = json.loads(body, encoding="UTF-8")
+
         self.send_response(200)
+        self.send_header('Content-type', 'text/html')
         self.end_headers()
+
         response = BytesIO()
         response.write(b'This is POST request. ')
         response.write(b'Received: ')
