@@ -58,7 +58,6 @@ strips = {
 }
 
 
-
 class ServiceExit(Exception):
     """
     Custom exception which is used to trigger the clean exit
@@ -69,16 +68,6 @@ class ServiceExit(Exception):
 
 def signal_handler(sig, frame):
     logging.warn('received signal for stopping')
-    # channel.stop_consuming()
-
-    # if producer != None:
-    #     producer.
-
-    if not consumer is None:
-        consumer.unsubscribe()
-        # consumer.close()
-    # sys.exit(0)
-
     # logging.warn('triggered STOP')
     raise ServiceExit
 
@@ -502,9 +491,10 @@ if __name__ == '__main__':
     initTelegram()
 
     try:
-        logging.info('starting thread for moving imported files')
-
+        logging.info('switching off the lights')
         ledOff()
+
+        logging.info('run and wait for commands')
         run()
 
     except ServiceExit:
