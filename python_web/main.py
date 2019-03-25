@@ -332,7 +332,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         global ledCmdRunning
         # SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
-        print "GET request %s" % (self.path,)
+        logging.info( "GET request %s" % (self.path,) )
 
         cmd = self.path[1:]
         res = 'ignored'
@@ -365,7 +365,15 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self._set_headers()
         # self.wfile.write(b'<html><body></body></html>')
         self.wfile.write(bytearray(s.replace('RESULT', res).replace('COMMANDS', cmdList)))
-        pass
+
+    def do_POST(self):
+        logging.info( "POST request %s - %s" % (self.path,self.command,) )
+        content = self.rfile.read()
+        logging.info(content)
+
+        self._set_headers()
+        self.wfile.write(b'<html><body>BLA</body></html>')
+
 
 
 commands = {
