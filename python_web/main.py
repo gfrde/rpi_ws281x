@@ -403,26 +403,18 @@ commands = {
 
     'empty_19': {'name': '', 'order': 19},
 
-    'red+': {'name': 'Red Up', 'order': 20, 'fct': ledRedMore},
     'redp': {'name': 'Red Up', 'order': 20, 'fct': ledRedMore},
-    'red-': {'name': 'Red Down', 'order': 21, 'fct': ledRedLess},
     'redm': {'name': 'Red Down', 'order': 21, 'fct': ledRedLess},
 
-    'green+': {'name': 'Green Up', 'order': 30, 'fct': ledGreenMore},
     'greenp': {'name': 'Green Up', 'order': 30, 'fct': ledGreenMore},
-    'green-': {'name': 'Green Down', 'order': 31, 'fct': ledGreenLess},
     'greenm': {'name': 'Green Down', 'order': 31, 'fct': ledGreenLess},
 
-    'blue+': {'name': 'Blue Up', 'order': 40, 'fct': ledBlueMore},
     'bluep': {'name': 'Blue Up', 'order': 40, 'fct': ledBlueMore},
-    'blue-': {'name': 'Blue Down', 'order': 41, 'fct': ledBlueLess},
     'bluem': {'name': 'Blue Down', 'order': 41, 'fct': ledBlueLess},
 
     'empty_49': {'name': '', 'order': 49},
 
-    'white+': {'name': 'White Up', 'order': 50, 'fct': ledWhiteMore},
     'whitep': {'name': 'White Up', 'order': 50, 'fct': ledWhiteMore},
-    'white-': {'name': 'White Down', 'order': 51, 'fct': ledWhiteLess},
     'whitem': {'name': 'White Down', 'order': 51, 'fct': ledWhiteLess},
 
     'empty_59': {'name': '', 'order': 59},
