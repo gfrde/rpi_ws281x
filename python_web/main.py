@@ -9,18 +9,20 @@ for using telegram, install the bot via pip:
 """
 
 import sys
-
-sys.path.append('../python')
-
 import os
+import signal
 import time
 import SocketServer
 import SimpleHTTPServer
 import logging
 
+sys.path.append('../python')
+
 from neopixel import *
 
 PORT = 8080
+httpd = None
+ledCmdRunning = False
 telegramToken = None
 telegramTask = None
 searchTelegramToken = [
@@ -48,12 +50,37 @@ BITPOS_WHITE = 24
 
 strips = {
     0: {'name': 'tv', 'factor': 1.0},
-    10: {'name': 'space', 'factor': 0.5},
+    10: {'name': 'space', 'factor': 1.0},
     60: {'name': 'space', 'factor': 1.0},
     180: {'name': 'couch', 'factor': 1.0},
     240: {'name': 'wall', 'factor': 1.0},
     300: {'name': 'read', 'factor': 1.0},
 }
+
+
+
+class ServiceExit(Exception):
+    """
+    Custom exception which is used to trigger the clean exit
+    of all running threads and the main program.
+    """
+    pass
+
+
+def signal_handler(sig, frame):
+    logging.warn('received signal for stopping')
+    # channel.stop_consuming()
+
+    # if producer != None:
+    #     producer.
+
+    if not consumer is None:
+        consumer.unsubscribe()
+        # consumer.close()
+    # sys.exit(0)
+
+    # logging.warn('triggered STOP')
+    raise ServiceExit
 
 
 def Color(red, green, blue, white=0):
@@ -105,8 +132,18 @@ for c in strips:
     stripColor[c] = v
 
 
+# ----------------------------------------------------------------------------------------
+# ------------------------------------------------------------------ main setter functions
+# ----------------------------------------------------------------------------------------
+
 def colorSet(currentColorSetting):
+    global ledCmdRunning
     logging.info('setting color')
+    if ledCmdRunning:
+        logging.info('someone is already writing')
+        return
+    ledCmdRunning = True
+
     """Wipe color across display a pixel at a time."""
     current = currentColorSetting[0]['color']
     current = factorizeByteWise(current, currentColorSetting[0]['factor'])
@@ -119,16 +156,25 @@ def colorSet(currentColorSetting):
         # print(' %5d: %s' % (i, str(current)))
         if not strip is None:
             strip.setPixelColor(i, current)
-    if not strip is None:
+    if strip is not None:
         strip.show()
+
+    ledCmdRunning = False
 
 
 # Define functions which animate LEDs in various ways.
 def colorWipe(color, wait_ms=0):
-    print('wiping color')
+    global ledCmdRunning
+    logging.info('wiping color')
+
     if strip is None:
         logging.warn('STRIP is None')
         return
+
+    if ledCmdRunning:
+        logging.info('someone is already writing')
+        return
+    ledCmdRunning = True
 
     """Wipe color across display a pixel at a time."""
     for i in range(strip.numPixels()):
@@ -139,6 +185,11 @@ def colorWipe(color, wait_ms=0):
             time.sleep(wait_ms / 1000.0)
 
     strip.show()
+    ledCmdRunning = False
+
+# ----------------------------------------------------------------------------------------
+# ------------------------------------------------------------------ high level setter
+# ----------------------------------------------------------------------------------------
 
 
 def ledOn():
@@ -254,6 +305,20 @@ def ledAll():
     colorSet(stripColor)
 
 
+def ledTv():
+    for c in strips:
+        stripColor[c]['color'] = Color(255, 255, 255, 255)
+        if c < 100:
+            stripColor[c]['factor'] = 0.5
+        else:
+            stripColor[c]['factor'] = 1.0
+    colorSet(stripColor)
+
+# ----------------------------------------------------------------------------------------
+# ------------------------------------------------------------------ Http server
+# ----------------------------------------------------------------------------------------
+
+
 class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def _set_headers(self):
         self.send_response(200)
@@ -261,36 +326,18 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        global ledCmdRunning
         # SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
-        print "GET request %s" % (self.path)
+        print "GET request %s" % (self.path,)
 
         cmd = self.path[1:]
         res = 'ignored'
-        if cmd in commands:
+        if ledCmdRunning:
+            res = 'another cmd running'
+        elif cmd in commands:
             res = cmd + ' - ok'
             commands[cmd]['fct']()
-        # if self.path == '/on':
-        #     ledOn()
-        #     res = 'OK'
-        # elif self.path == '/off':
-        #     ledOff()
-        #     res = 'OK'
-        # elif self.path == '/up':
-        #     ledBright()
-        #     res = 'OK'
-        # elif self.path == '/down':
-        #     ledDarker()
-        #     res = 'OK'
-        # elif self.path == '/warm':
-        #     ledWarm()
-        #     res = 'OK'
-        # elif self.path == '/cold':
-        #     ledCold()
-        #     res = 'OK'
-        # elif self.path == '/all':
-        #     ledAll()
-        #     res = 'OK'
 
         s = """<html><body>
         <div>Result: RESULT</div>
@@ -378,11 +425,13 @@ def initAll():
     strip.begin()
 
 
-def hello(bot, update):
+def handleTelegramMsg(bot, update):
     logging.info('telegram command: %s' % (update.message.text,) )
     cmd = update.message.text[1:]
     res = 'ignored'
-    if cmd in commands:
+    if ledCmdRunning:
+        res = 'another cmd running'
+    elif cmd in commands:
         res = 'ok'
         commands[cmd]['fct']()
     update.message.reply_text(
@@ -421,7 +470,7 @@ def initTelegram():
     if telegramToken is not None:
         from telegram.ext import Updater, CommandHandler
         updater = Updater(token=telegramToken)
-        updater.dispatcher.add_handler(CommandHandler(cmds, hello))
+        updater.dispatcher.add_handler(CommandHandler(cmds, handleTelegramMsg))
 
         updater.start_polling(poll_interval=5)
         telegramTask = updater
@@ -430,12 +479,14 @@ def initTelegram():
 
 
 def run():
+    global httpd
     # Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
     Handler = LedHttpServer
 
     httpd = SocketServer.TCPServer(("", PORT), Handler)
     print "serving at port", PORT
     httpd.serve_forever()
+
     logging.info('HTTP task killed')
 
 
@@ -444,15 +495,28 @@ if __name__ == '__main__':
     # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
+    # handle "CTRL+C" to shutdown all threads regularly
+    signal.signal(signal.SIGINT, signal_handler)
+
     initAll()
     initTelegram()
 
-    ledOff()
-    run()
-    #colorSet(None, stripColor)
+    try:
+        logging.info('starting thread for moving imported files')
+
+        ledOff()
+        run()
+
+    except ServiceExit:
+        logging.info('stopping threads')
+        if httpd is not None:
+            httpd.shutdown()
 
     if telegramTask is not None:
         logging.info('stopping telegram task')
         telegramTask.stop()
+
+    #colorSet(None, stripColor)
+
 
     pass
