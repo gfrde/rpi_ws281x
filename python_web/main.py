@@ -303,6 +303,20 @@ def ledTv():
             stripColor[c]['factor'] = 1.0
     colorSet(stripColor)
 
+
+def ledShow1():
+    colorWipe(Color(200, 0, 0, 0))
+    time.sleep(3)
+    colorWipe(Color(0, 200, 0, 0))
+    time.sleep(3)
+    colorWipe(Color(0, 0, 200, 0))
+    time.sleep(3)
+    colorWipe(Color(0, 0, 0, 200))
+    time.sleep(3)
+
+    colorWipe(Color(100, 100, 100, 200))
+    time.sleep(3)
+
 # ----------------------------------------------------------------------------------------
 # ------------------------------------------------------------------ Http server
 # ----------------------------------------------------------------------------------------
@@ -398,6 +412,10 @@ commands = {
     'red': {'name': 'Red', 'order': 60, 'fct': ledRed},
     'green': {'name': 'Green', 'order': 61, 'fct': ledGreen},
     'blue': {'name': 'Blue', 'order': 62, 'fct': ledBlue},
+
+    'empty_80': {'name': '', 'order': 80},
+    'tv': {'name': 'TV', 'order': 81, 'fct': ledTv},
+    'show1': {'name': 'show 1', 'order': 82, 'fct': ledShow1},
 
 }
 
