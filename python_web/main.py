@@ -346,7 +346,11 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         cmd = self.path[1:]
         res = 'ignored'
-        if ledCmdRunning:
+        if len(cmd)>0 and os.path.exists(self.path):
+            # if an existing file has been referenced, return it
+            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+            return
+        elif ledCmdRunning:
             res = 'another cmd running'
         elif cmd in commands:
             res = cmd + ' - ok'
@@ -357,6 +361,9 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         <br/>
         COMMANDS
         <br/>
+        <script src="/jquery-1.9.1.js"></script>
+        <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
+        <!--<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>-->
         </body></html>
         """
 
