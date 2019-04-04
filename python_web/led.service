@@ -5,7 +5,8 @@ After=network.target
 [Service]
 Type=simple
 RemainAfterExit=yes
-ExecStart=/usr/bin/python /home/pi/led/rpi_ws281x/python_web/main.py
+WorkingDirectory=/home/pi/led/rpi_ws281x/python_web/
+ExecStart=/usr/bin/python main.py
 
 [Install]
 WantedBy=multi-user.target
