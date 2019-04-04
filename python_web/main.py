@@ -319,6 +319,14 @@ def ledShow1():
     colorWipe(Color(100, 100, 100, 200))
     time.sleep(3)
 
+
+def reinit():
+    global strip
+    strip = None
+
+    time.sleep(2.0)
+    initAll()
+
 # ----------------------------------------------------------------------------------------
 # ------------------------------------------------------------------ Http server
 # ----------------------------------------------------------------------------------------
@@ -387,6 +395,8 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 
 commands = {
+    'reinit':  {'name': 'reinit', 'order': 0, 'fct': reinit},
+
     'on':  {'name': 'An', 'order': 1, 'fct': ledOn},
     'off': {'name': 'Aus', 'order': 2, 'fct': ledOff},
 
@@ -426,7 +436,6 @@ commands = {
     'empty_80': {'name': '', 'order': 80},
     'tv': {'name': 'TV', 'order': 81, 'fct': ledTv},
     'show1': {'name': 'show 1', 'order': 82, 'fct': ledShow1},
-
 }
 
 for c in commands:
