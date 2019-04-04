@@ -391,6 +391,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         for v in ordered:
             if v['key'].startswith('empty'):
                 cmdList += '<br/>'
+                continue
             cmdList += '<button type="button" onclick="proceed(\'%s\');">%s</button> ' % (v['key'], v['name'],)
             cmdList += '<a href="/%s">%s</a><br/>' % (v['key'], v['name'],)
 
@@ -405,7 +406,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         data = json.loads(body, encoding="UTF-8")
 
-        cmd = data.action
+        cmd = data['action']
         res = 'unknown command: ' + cmd
         if ledCmdRunning:
             res = 'another cmd running'
@@ -416,12 +417,13 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
-        response = BytesIO()
-        response.write(bytearray(res))
+        # response = BytesIO()
+        # response.write(res)
         # response.write(b'This is POST request. ')
         # response.write(b'Received: ')
         # response.write(body)
-        self.wfile.write(response.getvalue())
+        # self.wfile.write(response.getvalue())
+        self.wfile.write(bytearray(res))
 
 
 commands = {
