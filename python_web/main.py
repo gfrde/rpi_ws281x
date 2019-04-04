@@ -364,8 +364,6 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         <br/>
         COMMANDS
         <br/>
-        <button type="button" onclick="proceed('off');">do</button> 
-        <br/>
         <script>
         function proceed (act) {
         param = { 'action': act }
@@ -393,7 +391,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 cmdList += '<br/>'
                 continue
             cmdList += '<button type="button" onclick="proceed(\'%s\');">%s</button> ' % (v['key'], v['name'],)
-            cmdList += '<a href="/%s">%s</a><br/>' % (v['key'], v['name'],)
+            # cmdList += '<a href="/%s">%s</a><br/>' % (v['key'], v['name'],)
 
         self._set_headers()
         # self.wfile.write(b'<html><body></body></html>')
@@ -412,6 +410,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
             res = 'another cmd running'
         elif cmd in commands:
             res = 'executed ' + cmd
+            commands[cmd]['fct']()
 
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -423,7 +422,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         # response.write(b'Received: ')
         # response.write(body)
         # self.wfile.write(response.getvalue())
-        self.wfile.write(bytearray(res))
+        self.wfile.write(bytearray(res, 'utf8'))
 
 
 commands = {
