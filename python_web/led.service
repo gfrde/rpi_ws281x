@@ -1,0 +1,12 @@
+[Unit]
+Description= led Service
+After=network.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/usr/bin/python /home/pi/led/rpi_ws281x/python_web/main.py
+
+[Install]
+WantedBy=multi-user.target
+Alias=led.service
