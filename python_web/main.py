@@ -346,7 +346,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         cmd = self.path[1:]
         res = 'ignored'
-        if len(cmd)>0 and os.path.exists(self.path):
+        if len(cmd)>0 and os.path.exists(cmd):
             # if an existing file has been referenced, return it
             SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
             return
@@ -356,23 +356,26 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
             res = cmd + ' - ok'
             commands[cmd]['fct']()
 
-        s = """<html><body>
+        s = """<?xml version="1.0" encoding="utf-8"?>
+        <!DOCTYPE html>
+        <html><body>
         <div>Result: RESULT</div>
-        <div id="myres"></div>
+        <div class="myres"></div>
         <br/>
         COMMANDS
         <br/>
-        <button type="button" onclick="proceed();">do</button> 
+        <button type="button" onclick="proceed('off');">do</button> 
         <br/>
         <script>
-        function proceed () {
-        param = { 'action': 'none' }
-        $.post("/", param, function(data, status){
-            $("myres").html(data);
+        function proceed (act) {
+        param = { 'action': act }
+        $.post("/", JSON.stringify(param), function(data, status){
+            console.log(data)
+            $("div.myres").html(data);
           });
           }
         </script>
-        <script src="/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="/jquery-1.9.1.js"></script>
         <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
         <!--<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>-->
         </body></html>
@@ -388,6 +391,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         for v in ordered:
             if v['key'].startswith('empty'):
                 cmdList += '<br/>'
+            cmdList += '<button type="button" onclick="proceed(\'%s\');">%s</button> ' % (v['key'], v['name'],)
             cmdList += '<a href="/%s">%s</a><br/>' % (v['key'], v['name'],)
 
         self._set_headers()
@@ -401,14 +405,22 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         data = json.loads(body, encoding="UTF-8")
 
+        cmd = data.action
+        res = 'unknown command: ' + cmd
+        if ledCmdRunning:
+            res = 'another cmd running'
+        elif cmd in commands:
+            res = 'executed ' + cmd
+
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
         response = BytesIO()
-        response.write(b'This is POST request. ')
-        response.write(b'Received: ')
-        response.write(body)
+        response.write(bytearray(res))
+        # response.write(b'This is POST request. ')
+        # response.write(b'Received: ')
+        # response.write(body)
         self.wfile.write(response.getvalue())
 
 
