@@ -358,9 +358,20 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         s = """<html><body>
         <div>Result: RESULT</div>
+        <div id="myres"></div>
         <br/>
         COMMANDS
         <br/>
+        <button type="button" onclick="proceed();">do</button> 
+        <br/>
+        <script>
+        function proceed () {
+        param = { 'action': 'none' }
+        $.post("/", param, function(data, status){
+            $("myres").html(data);
+          });
+          }
+        </script>
         <script src="/jquery-1.9.1.js"></script>
         <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
         <!--<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>-->
