@@ -389,6 +389,7 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
         for v in ordered:
             if v['key'].startswith('empty'):
                 cmdList += '<br/>'
+                cmdList += '<br/>'
                 continue
             cmdList += '<button type="button" onclick="proceed(\'%s\');">%s</button> ' % (v['key'], v['name'],)
             # cmdList += '<a href="/%s">%s</a><br/>' % (v['key'], v['name'],)
