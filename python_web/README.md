@@ -11,3 +11,6 @@ sudo ln -s ${p}/led.service /etc/systemd/system/led.service
 
 sudo systemctl daemon-reload
 sudo systemctl enable led
+
+
+## copy ssh key

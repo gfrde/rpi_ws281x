@@ -327,6 +327,13 @@ def reinit():
     time.sleep(2.0)
     initAll()
 
+def reboot():
+    command = "/usr/bin/sudo /sbin/shutdown -r now"
+    import subprocess
+    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    output = process.communicate()[0]
+    print output
+
 # ----------------------------------------------------------------------------------------
 # ------------------------------------------------------------------ Http server
 # ----------------------------------------------------------------------------------------
@@ -427,8 +434,6 @@ class LedHttpServer(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 
 commands = {
-    'reinit':  {'name': 'reinit', 'order': 0, 'fct': reinit},
-
     'on':  {'name': 'An', 'order': 1, 'fct': ledOn},
     'off': {'name': 'Aus', 'order': 2, 'fct': ledOff},
 
@@ -468,6 +473,12 @@ commands = {
     'empty_80': {'name': '', 'order': 80},
     'tv': {'name': 'TV', 'order': 81, 'fct': ledTv},
     'show1': {'name': 'show 1', 'order': 82, 'fct': ledShow1},
+
+    'empty_90': {'name': '', 'order': 90},
+    'empty_91': {'name': '', 'order': 91},
+    'reinit': {'name': 'reinit', 'order': 92, 'fct': reinit},
+    'reboot': {'name': 'reboot', 'order': 94, 'fct': reboot},
+
 }
 
 for c in commands:
